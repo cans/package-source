@@ -1,0 +1,25 @@
+galaxy_info:
+  author: Nicolas CANIART
+  description: Role to manage Distribution Package Sources and their Encryption Keys
+  company: 
+
+  license: GPLv2
+
+  min_ansible_version: 2.3
+  github_branch: master
+
+  platforms:
+  - name: Debian
+    versions:
+    - jessie
+    - sid
+    - stretch
+
+  galaxy_tags:
+    - 'package'
+    - 'source'
+    - 'repository'
+    - 'distribution'
+    - 'debian'
+
+dependencies: []

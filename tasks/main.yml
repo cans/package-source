@@ -1,0 +1,57 @@
+---
+- name: Add APT Distribution Package Sources GPG Key
+  apt_key:
+    id: "{{ item.key_id }}"
+    keyring: "{{ item.keyring | default(omit) }}"
+    keyserver: "{{ item.keyserver | default(omit) }}"
+    state: present
+    url: "{{ item.key_url | default(omit) }}"
+  become: yes
+  remote_user: "{{ pkg_sources_user }}"
+  when: ansible_pkg_mgr == 'apt' and item.key_id is defined
+  # and item.startswith('deb')
+  with_items: "{{ pkg_sources_add }}"
+
+- name: Add APT Distribution Package Sources
+  apt_repository:
+    repo: "{{ item.repo }}"
+    state: present
+    codename: "{{ item.codename | default(omit) }}"
+    update_cache: "{{ item.update_cache | default('no') }}"
+  become: yes
+  remote_user: "{{ pkg_sources_user }}"
+  when: ansible_pkg_mgr == 'apt' and item.repo is defined
+  # and item.startswith('deb')
+  with_items: "{{ pkg_sources_add }}"
+
+- name: Remove APT Distribution Package Sources 
+  apt_repository:
+    repo: "{{item}}"
+    state: absent
+  become: yes
+  remote_user: "{{ pkg_sources_user}}"
+  when: ansible_pkg_mgr == 'apt' and item.repo is defined
+  # and item.startswith('deb')
+  with_items: "{{pkg_sources_del}}"
+
+- name: Remove APT Distribution Package Sources GPG Key
+  apt_key:
+    id: "{{ item.key_id }}"
+    keyring: "{{ item.keyring | default(omit) }}"
+    state: absent
+    url: "{{ item.key_url | default(omit) }}"
+  become: yes
+  remote_user: "{{ pkg_sources_user }}"
+  when: ansible_pkg_mgr == 'apt' and item.key_id is defined
+  # and item.startswith('deb')
+  with_items: "{{ pkg_sources_del }}"
+
+
+# Yum is madly complicated in my opinion. Since I only have very little
+# experience with it, I will not make any attempt to provide support
+# for it (would most likely end-up being broken anyway)
+# If you want to, please contribute, otherwise Yum will likely remain
+# unsupported.
+
+
+# vim: syntax=yaml:ts=2:sw=2:et:

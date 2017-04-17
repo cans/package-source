@@ -7,10 +7,8 @@
     state: present
     url: "{{ item.key_url | default(omit) }}"
   become: yes
-  remote_user: "{{ pkg_sources_user }}"
   when: ansible_pkg_mgr == 'apt' and item.key_id is defined
-  # and item.startswith('deb')
-  with_items: "{{ pkg_sources_add }}"
+  with_items: "{{ pkgsource_add }}"
 
 - name: Add APT Distribution Package Sources
   apt_repository:
@@ -19,20 +17,16 @@
     codename: "{{ item.codename | default(omit) }}"
     update_cache: "{{ item.update_cache | default('no') }}"
   become: yes
-  remote_user: "{{ pkg_sources_user }}"
-  when: ansible_pkg_mgr == 'apt' and item.repo is defined
-  # and item.startswith('deb')
-  with_items: "{{ pkg_sources_add }}"
+  when: ansible_pkg_mgr == 'apt' and item.repo.startswith('deb')
+  with_items: "{{ pkgsource_add }}"
 
 - name: Remove APT Distribution Package Sources 
   apt_repository:
     repo: "{{item}}"
     state: absent
   become: yes
-  remote_user: "{{ pkg_sources_user}}"
-  when: ansible_pkg_mgr == 'apt' and item.repo is defined
-  # and item.startswith('deb')
-  with_items: "{{pkg_sources_del}}"
+  when: ansible_pkg_mgr == 'apt' and item.repo.startswith('deb')
+  with_items: "{{pkgsource_del}}"
 
 - name: Remove APT Distribution Package Sources GPG Key
   apt_key:
@@ -41,10 +35,9 @@
     state: absent
     url: "{{ item.key_url | default(omit) }}"
   become: yes
-  remote_user: "{{ pkg_sources_user }}"
   when: ansible_pkg_mgr == 'apt' and item.key_id is defined
   # and item.startswith('deb')
-  with_items: "{{ pkg_sources_del }}"
+  with_items: "{{ pkgsource_del }}"
 
 
 # Yum is madly complicated in my opinion. Since I only have very little

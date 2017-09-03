@@ -1,6 +1,10 @@
 cans.package-sources
 ====================
 
+[![Build Status](https://travis-ci.org/cans/package-sources.svg?branch=master)](https://travis-ci.org/cans/package-sources)
+[![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-cans.package--source-blue.svg?style=flat-square)](https://galaxy.ansible.com/cans/package-source)
+[![License](https://img.shields.io/badge/license-GPLv2-brightgreen.svg?style=flat-square)](LICENSE)
+
 Simple role to add and / or remove distribution package sources and
 their respective GPG keys.
 
@@ -48,6 +52,7 @@ This package has the requirements of Ansible's distribution package
 sources management modules:
 
 - For Debian based distributions see [apt\_repository](http://docs.ansible.com/ansible/apt_repository_module.html)
+  and [apt\_key](http://doc.ansible.com/ansible/apt_key_module.html) modules;
   
 
 
@@ -55,13 +60,13 @@ Role Variables
 --------------
 
 All the variables from this module are namespaced with the prefix
-`pkg_sources`.
+`pkgsources`.
 
-- `pkg_sources_add`: the list of sources you want to make sure are
+- `pkgsources_add`: the list of sources you want to make sure are
   available (default: `[]`);
-- `pkg_sources_del`: the list of sources you want to make sure are
+- `pkgsources_del`: the list of sources you want to make sure are
   *not* available (default: `[]`);
-- `pkg_sources_user`: the user to connect as to update the sources
+- `pkgsources_user`: the user to connect as to update the sources
   on the target hosts (default: `ansible_user_id`).
 
 
@@ -84,7 +89,7 @@ repositories and packages signatures.
     - hosts: servers
       roles:
          - role: "cans.package-source"
-           pkg_sources_add:
+           pkgsources_add:
              # Simply add a source Debian current release backport packages
              - repo: "deb http://ftp.fr.debian.org/debian/ stable-backports main"
 
@@ -96,7 +101,7 @@ repositories and packages signatures.
                key_url: "https://toolbelt.herokuapp.com/apt/release.key"
 
            # The deprecated sources you want removed.
-           pkg_sources_del:
+           pkgsources_del:
              - "deb http://ftp.fr.debian.org/debian/ wheezy main"
                # Force cache update on last repository added or removed so the new
                # configuration is validated

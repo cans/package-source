@@ -1,5 +1,5 @@
-cans.package-sources
-====================
+cans.package-source
+===================
 
 [![Build Status](https://travis-ci.org/cans/package-sources.svg?branch=master)](https://travis-ci.org/cans/package-sources)
 [![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-cans.package--source-blue.svg?style=flat-square)](https://galaxy.ansible.com/cans/package-source)
@@ -62,11 +62,11 @@ Role Variables
 All the variables from this module are namespaced with the prefix
 `pkgsources`.
 
-- `pkgsources_add`: the list of sources you want to make sure are
+- `pkgsource_present`: the list of sources you want to make sure are
   available (default: `[]`);
-- `pkgsources_del`: the list of sources you want to make sure are
+- `pkgsource_absent`: the list of sources you want to make sure are
   *not* available (default: `[]`);
-- `pkgsources_user`: the user to connect as to update the sources
+- `pkgsource_user`: the user to connect as to update the sources
   on the target hosts (default: `ansible_user_id`).
 
 
@@ -89,8 +89,9 @@ repositories and packages signatures.
     - hosts: servers
       roles:
          - role: "cans.package-source"
-           pkgsources_add:
-             # Simply add a source Debian current release backport packages
+           pkgsource_present:
+             # Simply ensure Debian current release backport packages repository
+             # is available
              - repo: "deb http://ftp.fr.debian.org/debian/ stable-backports main"
 
              # Heroku's toolbelt repository (cli tool)
@@ -101,7 +102,7 @@ repositories and packages signatures.
                key_url: "https://toolbelt.herokuapp.com/apt/release.key"
 
            # The deprecated sources you want removed.
-           pkgsources_del:
+           pkgsource_absent:
              - "deb http://ftp.fr.debian.org/debian/ wheezy main"
                # Force cache update on last repository added or removed so the new
                # configuration is validated
@@ -111,7 +112,7 @@ repositories and packages signatures.
 License
 -------
 
-The Ansible role package-sources is free software: you can
+The Ansible role package-source is free software: you can
 redistribute it and/or modify it under the terms of the GNU General
 Public License version 2 as published by the Free Software Foundation.
 

@@ -8,7 +8,7 @@
     url: "{{ item.key_url | default(omit) }}"
   become: yes
   when: ansible_pkg_mgr == 'apt' and item.key_id is defined
-  with_items: "{{ pkgsource_add }}"
+  with_items: "{{ pkgsource_present }}"
 
 - name: Add APT Distribution Package Sources
   apt_repository:
@@ -18,7 +18,8 @@
     update_cache: "{{ item.update_cache | default('no') }}"
   become: yes
   when: ansible_pkg_mgr == 'apt' and item.repo.startswith('deb')
-  with_items: "{{ pkgsource_add }}"
+  with_items: "{{ pkgsource_present }}"
+  register: _pkgsource_present_result
 
 - name: Remove APT Distribution Package Sources 
   apt_repository:
@@ -26,7 +27,8 @@
     state: absent
   become: yes
   when: ansible_pkg_mgr == 'apt' and item.repo.startswith('deb')
-  with_items: "{{pkgsource_del}}"
+  with_items: "{{ pkgsource_absent }}"
+  register: _pkgsource_absent_result
 
 - name: Remove APT Distribution Package Sources GPG Key
   apt_key:
@@ -37,7 +39,13 @@
   become: yes
   when: ansible_pkg_mgr == 'apt' and item.key_id is defined
   # and item.startswith('deb')
-  with_items: "{{ pkgsource_del }}"
+  with_items: "{{ pkgsource_absent }}"
+
+- name: Update APT Cache
+  apt:
+    update_cache: yes
+  when: "_pkgsource_absent_result.changed or _pkgsource_present_result.changed"
+  become: yes
 
 
 # Yum is madly complicated in my opinion. Since I only have very little
@@ -47,4 +55,4 @@
 # unsupported.
 
 
-# vim: syntax=yaml:ts=2:sw=2:et:
+# vim: et:sw=2:syntax=yaml:ts=2:

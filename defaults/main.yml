@@ -1,4 +1,4 @@
 ---
-pkgsources_add: []
-pkgsources_del: []
-pkgsources_user: "{{ ansible_user_id }}"
+pkgsource_absent: []
+pkgsource_present: []
+pkgsource_user: "{{ ansible_user_id }}"

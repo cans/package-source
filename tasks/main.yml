@@ -1,5 +1,5 @@
 ---
-- name: Add APT Distribution Package Sources GPG Key
+- name: "Add APT Distribution Package Sources GPG Key"
   apt_key:
     id: "{{ item.key_id }}"
     keyring: "{{ item.keyring | default(omit) }}"
@@ -10,7 +10,7 @@
   when: ansible_pkg_mgr == 'apt' and item.key_id is defined
   with_items: "{{ pkgsource_present }}"
 
-- name: Add APT Distribution Package Sources
+- name: "Add APT Distribution Package Sources"
   apt_repository:
     repo: "{{ item.repo }}"
     state: present
@@ -21,7 +21,7 @@
   with_items: "{{ pkgsource_present }}"
   register: _pkgsource_present_result
 
-- name: Remove APT Distribution Package Sources 
+- name: "Remove APT Distribution Package Sources"
   apt_repository:
     repo: "{{item}}"
     state: absent
@@ -30,7 +30,7 @@
   with_items: "{{ pkgsource_absent }}"
   register: _pkgsource_absent_result
 
-- name: Remove APT Distribution Package Sources GPG Key
+- name: "Remove APT Distribution Package Sources GPG Key"
   apt_key:
     id: "{{ item.key_id }}"
     keyring: "{{ item.keyring | default(omit) }}"
@@ -41,7 +41,7 @@
   # and item.startswith('deb')
   with_items: "{{ pkgsource_absent }}"
 
-- name: Update APT Cache
+- name: "Update APT Cache"
   apt:
     update_cache: yes
   when: "_pkgsource_absent_result.changed or _pkgsource_present_result.changed"

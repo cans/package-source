@@ -1,52 +1,43 @@
 ---
-- name: Add APT Distribution Package Sources GPG Key
+- name: "Add APT Distribution Package Sources GPG Key"
   apt_key:
     id: "{{ item.key_id }}"
     keyring: "{{ item.keyring | default(omit) }}"
     keyserver: "{{ item.keyserver | default(omit) }}"
     state: present
     url: "{{ item.key_url | default(omit) }}"
-  become: yes
   when: ansible_pkg_mgr == 'apt' and item.key_id is defined
   with_items: "{{ pkgsource_present }}"
 
-- name: Add APT Distribution Package Sources
+- name: "Add APT Distribution Package Sources"
   apt_repository:
     repo: "{{ item.repo }}"
     state: present
     codename: "{{ item.codename | default(omit) }}"
     update_cache: "{{ item.update_cache | default('no') }}"
-  become: yes
   when: ansible_pkg_mgr == 'apt' and item.repo.startswith('deb')
   with_items: "{{ pkgsource_present }}"
-  register: _pkgsource_present_result
+  notify:
+    - "update apt cache"
 
-- name: Remove APT Distribution Package Sources 
+- name: "Remove APT Distribution Package Sources"
   apt_repository:
-    repo: "{{item}}"
+    repo: "{{ item.repo }}"
     state: absent
-  become: yes
   when: ansible_pkg_mgr == 'apt' and item.repo.startswith('deb')
   with_items: "{{ pkgsource_absent }}"
-  register: _pkgsource_absent_result
+  notify:
+    - "update apt cache"
 
-- name: Remove APT Distribution Package Sources GPG Key
+- name: "Remove APT Distribution Package Sources GPG Key"
   apt_key:
     id: "{{ item.key_id }}"
     keyring: "{{ item.keyring | default(omit) }}"
     state: absent
     url: "{{ item.key_url | default(omit) }}"
-  become: yes
   when: ansible_pkg_mgr == 'apt' and item.key_id is defined
   # and item.startswith('deb')
   with_items: "{{ pkgsource_absent }}"
-
-- name: Update APT Cache
-  apt:
-    update_cache: yes
-  when: "_pkgsource_absent_result.changed or _pkgsource_present_result.changed"
-  become: yes
-
 
 # Yum is madly complicated in my opinion. Since I only have very little
 # experience with it, I will not make any attempt to provide support

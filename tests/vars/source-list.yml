@@ -1,0 +1,6 @@
+source_list:
+  - repo: "deb https://cli-assets.heroku.com/branches/stable/apt ./"
+    # These two lines will ensure Heroku's GPG key is intalled *before*
+    # adding the repository to the source list.
+    key_id: 0F1B0520
+    key_url: "https://cli-assets.heroku.com/apt/release.key"

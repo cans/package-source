@@ -1,5 +1,69 @@
 ---
 - hosts: localhost
   remote_user: root
+  vars_files:
+    - vars/source-list.yml
+  pre_tasks:
+    - name: "Record APT's cache last update timestamp"
+      stat: 
+        path: "/var/cache/apt/pkgcache.bin"
+      register: apt_cache_before_insertion
   roles:
-    - package-sources
+    - role: "package-source"
+      pkgsource_present: "{{ source_list }}"
+      become: true
+
+  tasks:
+    - name: "Check heroku source was added."
+      command: grep -lr "https://cli-assets.heroku.com/branches/stable/apt" /etc/apt
+
+    - name: "Flush notified handlers (ensures APT cache will be updated if state changed)"
+      meta: flush_handlers
+
+    - name: "Record APT's cache last update timestamp"
+      stat: 
+        path: "/var/cache/apt/pkgcache.bin"
+      register: apt_cache_after_insertion
+
+    - name: "Check APT cache was updated"
+      fail:
+        msg: "APT's cache was not updated !"
+      when: "apt_cache_after_insertion.stat.mtime == apt_cache_before_insertion.stat.mtime"
+
+
+- hosts: localhost
+  remote_user: root
+  vars_files:
+    - vars/source-list.yml
+
+  pre_tasks:
+    - name: "Record APT's cache last update timestamp"
+      stat: 
+        path: "/var/cache/apt/pkgcache.bin"
+      register: apt_cache_before_removal
+       
+  roles:
+    - role: "package-source"
+      pkgsource_absent: "{{ source_list }}"
+      become: true
+
+  tasks:
+    - name: "Check heroku source was removed."
+      command: grep -lr "https://cli-assets.heroku.com/branches/stable/apt" /etc/apt
+      failed_when: result.rc != 1
+      register: result
+
+    - name: "Flush notified handlers (ensures APT cache will be updated if state changed)"
+      meta: flush_handlers
+
+    - name: "Record APT's cache last update timestamp"
+      stat: 
+        path: "/var/cache/apt/pkgcache.bin"
+      register: apt_cache_after_removal
+
+    - name: "Check APT cache was updated"
+      fail:
+        msg: "APT's cache was not updated !"
+      when: "apt_cache_after_removal.stat.mtime == apt_cache_before_removal.stat.mtime"
+
+# vim: et:sw=2:syntax=yaml:ts=2:

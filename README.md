@@ -1,7 +1,7 @@
 cans.package-source
 ===================
 
-[![Build Status](https://travis-ci.org/cans/package-sources.svg?branch=master)](https://travis-ci.org/cans/package-sources)
+[![Build Status](https://travis-ci.org/cans/package-source.svg?branch=master)](https://travis-ci.org/cans/package-sources)
 [![Ansible Galaxy](https://img.shields.io/badge/ansible--galaxy-cans.package--source-blue.svg?style=flat-square)](https://galaxy.ansible.com/cans/package-source)
 [![License](https://img.shields.io/badge/license-GPLv2-brightgreen.svg?style=flat-square)](LICENSE)
 

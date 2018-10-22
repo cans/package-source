@@ -1,4 +1,3 @@
 ---
 pkgsource_absent: []
 pkgsource_present: []
-pkgsource_user: "{{ ansible_user_id }}"

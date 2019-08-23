@@ -53,7 +53,7 @@ sources management modules:
 
 - For Debian based distributions see [apt\_repository](http://docs.ansible.com/ansible/apt_repository_module.html)
   and [apt\_key](http://doc.ansible.com/ansible/apt_key_module.html) modules;
-  
+
 
 
 Role Variables
@@ -66,8 +66,13 @@ All the variables from this module are namespaced with the prefix
   available (default: `[]`);
 - `pkgsource_absent`: the list of sources you want to make sure are
   *not* available (default: `[]`);
-- `pkgsource_user`: the user to connect as to update the sources
-  on the target hosts (default: `ansible_user_id`).
+
+
+### Deprecated variables
+
+- `pkgsource_user`: this variable has been deprecated, as you can define
+  this as you import the role or at the play level. The variable was in fact
+  not used (default: `ansible_user_id`).
 
 
 Dependencies
@@ -80,7 +85,7 @@ Example Playbook <a name="example-playbook"></a>
 ----------------
 
 In this playbook, we add two new sources to APT and remove one.
-With the second added source, we will also install the repository's GPG 
+With the second added source, we will also install the repository's GPG
 key. Finally, since this role adds then removes repositories, on the
 last (and only) removed repository removed, we force a cache update
 that ensure the configuration is valid indeed and APT can verify all
@@ -128,4 +133,4 @@ along with package-sources. If not, see <http://www.gnu.org/licenses/>.
 Author Information
 ------------------
 
-Copyright © 2017, Nicolas CANIART.
+Copyright © 2017-2018, Nicolas CANIART.

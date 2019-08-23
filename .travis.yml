@@ -1,6 +1,13 @@
 ---
 language: python
-python: "2.7"
+python:
+- "2.7"
+- "3.7"
+env:
+- ANSIBLE_VERSION="2.5.*"
+- ANSIBLE_VERSION="2.6.*"
+- ANSIBLE_VERSION="2.7.*"
+- ANSIBLE_VERSION="2.8.*"
 
 # Use the new container infrastructure
 sudo: required
@@ -13,9 +20,11 @@ addons:
 
 install:
   # Install ansible
-  - pip install ansible "ansible-lint>=3.4.15"
+  - pip install "ansible==${ANSIBLE_VERSION}" "ansible-lint==4.1.*"
 
-  # Check ansible version
+  # Record ansible version
+  - ansible --version
+  # Record ansible-lint version
   - ansible --version
 
   # Create ansible.cfg with correct roles_path
@@ -23,7 +32,7 @@ install:
 
 script:
   # Lint the role, but we don't want this to fail the build.
-  - ansible-lint tests/test.yml || echo "we don't mind"
+  - ansible-lint tests/test.yml tests/local.yml
   # Basic role syntax check
   - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
   - ansible-playbook tests/test.yml -i tests/inventory --connection=local

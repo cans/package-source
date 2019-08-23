@@ -1,69 +1,71 @@
 ---
-- hosts: localhost
+- hosts: servers
+  gather_facts: true  # required by the role
+  name: "Add Package Source -- APT"
   remote_user: root
   vars_files:
     - vars/source-list.yml
-  pre_tasks:
-    - name: "Record APT's cache last update timestamp"
-      stat: 
-        path: "/var/cache/apt/pkgcache.bin"
-      register: apt_cache_before_insertion
+
   roles:
     - role: "package-source"
       pkgsource_present: "{{ source_list }}"
       become: true
 
-  tasks:
+  post_tasks:
     - name: "Check heroku source was added."
       command: grep -lr "https://cli-assets.heroku.com/branches/stable/apt" /etc/apt
+      changed_when: false
 
-    - name: "Flush notified handlers (ensures APT cache will be updated if state changed)"
-      meta: flush_handlers
+    - name: "Ensure APT's cache was updated"
+      assert:
+        that:
+          - pkgsource_cache_update is defined
+          - pkgsource_cache_update is changed
 
-    - name: "Record APT's cache last update timestamp"
-      stat: 
-        path: "/var/cache/apt/pkgcache.bin"
-      register: apt_cache_after_insertion
+    - name: "Reset cache update fact"
+      set_fact:
+        pkgsource_cache_update: {}
 
-    - name: "Check APT cache was updated"
-      fail:
-        msg: "APT's cache was not updated !"
-      when: "apt_cache_after_insertion.stat.mtime == apt_cache_before_insertion.stat.mtime"
-
-
-- hosts: localhost
+- hosts: servers
+  name: "Delete Package Source -- APT"
   remote_user: root
+  gather_facts: true  # required by the role
   vars_files:
     - vars/source-list.yml
 
   pre_tasks:
-    - name: "Record APT's cache last update timestamp"
-      stat: 
-        path: "/var/cache/apt/pkgcache.bin"
-      register: apt_cache_before_removal
-       
+    - name: "Ensure cache update state is clean"
+      assert:
+        that:
+          - pkgsource_cache_update == {}
+
   roles:
     - role: "package-source"
       pkgsource_absent: "{{ source_list }}"
       become: true
 
-  tasks:
+  post_tasks:
     - name: "Check heroku source was removed."
       command: grep -lr "https://cli-assets.heroku.com/branches/stable/apt" /etc/apt
+      changed_when: false
       failed_when: result.rc != 1
       register: result
 
-    - name: "Flush notified handlers (ensures APT cache will be updated if state changed)"
-      meta: flush_handlers
+    - debug:
+        var: pkgsource_cache_update
+        verbosity: 1
 
-    - name: "Record APT's cache last update timestamp"
-      stat: 
-        path: "/var/cache/apt/pkgcache.bin"
-      register: apt_cache_after_removal
+    - name: "Ensure APT's cache last update timestamp"
+      assert:
+        that:
+          # Ensures the handler was called.
+          - pkgsource_cache_update != {}
+          # Same as above here...
+          # - pkgsource_cache_update is changed
 
-    - name: "Check APT cache was updated"
-      fail:
-        msg: "APT's cache was not updated !"
-      when: "apt_cache_after_removal.stat.mtime == apt_cache_before_removal.stat.mtime"
+    - name: "Reset cache update fact"
+      set_fact:
+        pkgsource_cache_update: {}
+
 
 # vim: et:sw=2:syntax=yaml:ts=2:

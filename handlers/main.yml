@@ -1,6 +1,7 @@
 ---
 - name: "update apt cache"
   apt:
-    update_cache: yes
+    update_cache: true
+  register: pkgsource_cache_update
 
 

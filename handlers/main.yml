@@ -4,4 +4,4 @@
     update_cache: true
   register: pkgsource_cache_update
 
-
+# vim: et:sw=2:syntax=yaml:ts=2:

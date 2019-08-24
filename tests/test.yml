@@ -48,6 +48,7 @@
     - name: "Check heroku source was removed."
       command: grep -lr "https://cli-assets.heroku.com/branches/stable/apt" /etc/apt
       changed_when: false
+      # grep returns 1 if it found no match which is what we want.
       failed_when: result.rc != 1
       register: result
 

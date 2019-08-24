@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/package-source
     docker:
-      - image: circleci/python:3.6
+      - image: circleci/python:3.7
         environment:
           TEST_REPORTS_DIR: ~/test-reports
     steps:
@@ -13,16 +13,14 @@ jobs:
       - run:
           name: Create required directories
           command: |
-             mkdir -p $TEST_REPORTS_DIR/ ~/.virtualenvs ~/.ssh
+             mkdir -p $TEST_REPORTS_DIR ~/.virtualenvs ~/.ssh
              # One needs to concateante here any files that can alter the virtualenv in a way:
              #   - setup.py: for the endpoints installed in $VIRTUAL_ENV/bin
              #   - requirements.txt
              #   - dev-requirements.txt
              # Since we do a develop install of the code itself (cf. the '-e .' in dev-requirments.txt)
              # it does not matter.
-             cat tests/requirements.txt tests/requirements.yml > circleci-requirements.txt
-             # Note that if the workflow is split, you will need to have the file `venv/circleci-requirements.txt`
-             # passed from one build job to the other, either through caching or using workspaces.
+             cat .circleci/config.yml tests/requirements.txt tests/requirements.yml > circleci-requirements.txt
 
       - restore_cache:
           key: v1-ansible-role-cache-{{ checksum "circleci-requirements.txt" }}
@@ -32,33 +30,30 @@ jobs:
           command: |
             if [ -d "${HOME}/.virtualenvs/ansible-role-testing"  ]
             then
-                :
+                echo "Reusing cached dependencies"
             else
-                pushd "${HOME}/.virtualenvs"
-                python -m venv "ansible-role-testing"
-                popd
-                printf "[ansible]\nroles_path = ${HOME}/roles:..\n" > ./ansible.cfg
+                python -m venv "${HOME}/.virtualenvs/ansible-role-testing"
                 . "${HOME}/.virtualenvs/ansible-role-testing/bin/activate"
                 pip install --upgrade "pip>=9.0.1"
                 pip install --upgrade -r tests/requirements.txt
-                ansible-galaxy install -r tests/requirements.yml -p "${HOME}/roles"
+                ansible-galaxy install -r tests/requirements.yml -p "tests/roles"
             fi
 
       - save_cache:
           key: v1-ansible-role-cache-{{ checksum "circleci-requirements.txt" }}
           paths:
             - ~/.virtualenvs
-            - ~/roles
+            - ./tests/roles
 
       - run:
           name: Run tests
           command: |
             . "${HOME}/.virtualenvs/ansible-role-testing/bin/activate"
-            tests/run-checks.sh
+            printf '[defaults]\nroles_path=../\nhost_key_checking=false' >ansible.cfg
+            yamllint .
+            ansible-lint tests/*.yml
+            ansible-playbook -i tests/inventory tests/test.yml --syntax-check
             ansible-playbook -i tests/inventory tests/test.yml --connection=local
-
-      - store_artifacts:
-          path: ~/test-reports
 
 
 # vim: et:sw=2:syntax=yaml:ts=2:
